@@ -1,0 +1,10 @@
+services:
+  web:
+    image: umamishra0929/sample-flask-app:v1
+    container_name: compose-web
+    ports:
+      - "5001:5000"
+
+  test:
+    image: umamishra0929/sample-flask-app:v1
+    container_name: compose-test

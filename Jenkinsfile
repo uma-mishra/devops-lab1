@@ -5,33 +5,41 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building application...'
-                sh 'test -f index.html'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Testing application...'
-                sh 'grep -q "DevOps CI/CD Pipeline" index.html'
+                echo 'Testing Kubernetes manifests...'
+                sh 'test -f deployment.yaml'
+                sh 'test -f service.yaml'
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Kubernetes') {
             steps {
-                echo 'Deploying application...'
-                sh 'mkdir -p /tmp/devops-deployment'
-                sh 'cp index.html /tmp/devops-deployment/index.html'
+                echo 'Deploying application to Minikube...'
+                sh 'minikube kubectl -- apply -f deployment.yaml'
+                sh 'minikube kubectl -- apply -f service.yaml'
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'minikube kubectl -- get deployments'
+                sh 'minikube kubectl -- get pods'
+                sh 'minikube kubectl -- get services'
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment completed successfully.'
+            echo 'Kubernetes deployment completed successfully.'
         }
 
         failure {
-            echo 'Pipeline failed.'
+            echo 'Kubernetes deployment failed.'
         }
     }
 }
